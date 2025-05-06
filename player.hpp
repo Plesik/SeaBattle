@@ -4,7 +4,7 @@
 
 class Player {
 private:
-    std::array<std::array<int, 10>, 10> grid{}; // Поле 10x10 (инициализировано нулями)
+    std::array<std::array<int, 10>, 10> grid{}; // Поле 10x10 (инициализировано нулями)...
     int shipsAlive = 10;                         // Счетчик кораблей
 
 public:
