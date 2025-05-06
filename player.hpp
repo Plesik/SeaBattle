@@ -50,8 +50,8 @@ public:
             std::cout << "\n";
         }
     }
-    int showcell(int x, y) { return grid[x][y]; }
+    int showcell(int x, int y) { return grid[x][y]; }
 
     // ¬озвращает количество живых кораблей
-    int getShipsAlive() const { return shipsAlive; }
+    int getShipsAlive() const { return shipsAlive; }    
 };
