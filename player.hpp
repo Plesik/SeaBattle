@@ -16,19 +16,8 @@ public:
 
     std::string fire(int x, int y) {
         if (grid[x][y] == 1) {
-            bool hasAliveParts = false;
-            if (x > 0 && grid[y][x - 1] == 1) hasAliveParts = true;
-            if (x < 9 && grid[y][x + 1] == 1) hasAliveParts = true;
-            if (y > 0 && grid[y - 1][x] == 1) hasAliveParts = true;
-            if (y < 9 && grid[y + 1][x] == 1) hasAliveParts = true;
             grid[x][y] = -1;
-            if (!hasAliveParts) {
-                shipsAlive--;
-                return "killed";
-            }
-            else {
-                return "hitted";
-            }
+            return "hitted"
         }
         else {
             grid[x][y] = -2;
