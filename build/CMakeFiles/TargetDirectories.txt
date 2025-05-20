@@ -1,0 +1,3 @@
+C:/Users/danii/source/repos/SeaBattle/build/CMakeFiles/SeaBattle.dir
+C:/Users/danii/source/repos/SeaBattle/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/danii/source/repos/SeaBattle/build/CMakeFiles/ZERO_CHECK.dir

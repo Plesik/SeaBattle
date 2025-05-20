@@ -2,45 +2,48 @@
 #include <array>
 #include <iostream>
 
-class Player {
+class Player { //класс отвечает за попадани€ в поле на котором расстановленны корабли, 
 private:
-    std::array<std::array<int, 10>, 10> grid{}; // ѕоле 10x10 (инициализировано нул€ми)...
-    int shipsAlive = 10;                         // —четчик кораблей
-
+    std::array<std::array<int, 12>, 12> grid{}; // ѕоле 12x12 (инициализировано нул€ми) корабли сто€ть только в поле 10*10 внутри
+    int shipsAlive = 10;// —четчик кораблей
+    std::array<int, 3> laststep{}; //{x, y, 1} - клетка с координатами [x, y] была частью корабл€ и подбита, если -1 то был огонь по пустой клетке
+    bool checkalive(const std::array<std::array<int, 12>, 12>& grid, int x, int y, int dx, int dy) {
+        if (grid[x + dx][y + dy] == 1) { return true; }
+        if (grid[x + dx][y + dy] == -1) {
+            if (grid[x + 2 * dx][y + 2 * dy] == 1) { return true; }
+            if (grid[x + 2 * dx][y + 2 * dy] == -1) {
+                if (grid[x + 3 * dx][y + 3 * dy] == 1) { return true; }
+            }
+        }
+        return false;
+    }
 public:
-    // ƒобавл€ет корабль в указанную клетку
+    // ƒобавл€ет корабль(часть корабл€) в указанную клетку
     void addShip(int x, int y) {
         grid[y][x] = 1;
-        shipsAlive++;
     }
 
-    std::string fire(int x, int y) {
-        if (grid[x][y] == 1) {
-            grid[x][y] = -1;
-            return "hitted"
+    std::string fire(int x, int y) { //огонь по бл€дскому хутору
+        if (grid[x+1][y+1] == 1) {
+            grid[x+1][y+1] = -1;
+            laststep = { x, y, 1 };
+            if (checkalive(grid, x+1, y+1, +1, 0) || checkalive(grid, x+1, y+1, -1, 0) || checkalive(grid, x+1, y+1, 0, +1) || checkalive(grid, x+1, y+1, 0, -1)) {
+                return "hitted";
+            }
+            else {
+                shipsAlive--;
+                return "killed";
+            }
         }
         else {
-            grid[x][y] = -2;
+            grid[x+1][y+1] = -2;
+            laststep = { x, y, -1 };
             return "missed";
         }
     }
+    int showcell(int x, int y) const { return grid[x+1][y+1]; }
 
-    // ќтображает текущее состо€ние пол€ (дл€ отладки)
-    void displayGrid() const {
-        std::cout << "  ";
-        for (int i = 0; i < 10; ++i) std::cout << i << " ";
-        std::cout << "\n";
+    const std::array<int, 3>& LastStep() const { return laststep; }
 
-        for (int y = 0; y < 10; ++y) {
-            std::cout << y << " ";
-            for (int x = 0; x < 10; ++x) {
-                std::cout << grid[y][x] << " ";
-            }
-            std::cout << "\n";
-        }
-    }
-    int showcell(int x, int y) { return grid[x][y]; }
-
-    // ¬озвращает количество живых кораблей
-    int getShipsAlive() const { return shipsAlive; }    
+    const int getShipsAlive() const { return shipsAlive; }    
 };

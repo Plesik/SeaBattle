@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\danii\source\repos\SeaBattle\build\CMakeFiles\ced2876eaef6461800201253e314e9b0\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{83CC875B-21B6-3EBE-8290-6A798D9BD552}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
