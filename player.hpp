@@ -18,16 +18,45 @@ private:
         return false;
     }
 public:
+    Player() = default;
     // Добавляет корабль(часть корабля) в указанную клетку
-    void addShip(int x, int y) {
-        grid[y][x] = 1;
+    bool addShip(int xl, int yl) {
+        int x = xl + 1;
+        int y = yl + 1;
+        bool usl = true;
+        if (grid[x][y] != 1) {
+            if (x + 1 <= 11 && y + 1 <= 11) {
+                if (grid[x + 1][y + 1] == 1) { usl = false; }
+            }
+            if (x - 1 >= 1 && y + 1 <= 11) {
+                if (grid[x - 1][y + 1] == 1) { usl = false; }
+            }
+            if (x + 1 <= 11 && y - 1 >= 1) {
+                if (grid[x + 1][y - 1] == 1) { usl = false; }
+            }
+            if (x - 1 >= 1 && y - 1 >= 1) {
+                if (grid[x - 1][y - 1] == 1) { usl = false; }
+            }
+            if (usl) {
+                grid[x][y] = 1;
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
     }
 
-    std::string fire(int x, int y) { //огонь по блядскому хутору
-        if (grid[x+1][y+1] == 1) {
-            grid[x+1][y+1] = -1;
-            laststep = { x, y, 1 };
-            if (checkalive(grid, x+1, y+1, +1, 0) || checkalive(grid, x+1, y+1, -1, 0) || checkalive(grid, x+1, y+1, 0, +1) || checkalive(grid, x+1, y+1, 0, -1)) {
+    std::string fire(int xl, int yl) { //огонь по блядскому хутору
+        int x = xl + 1;
+        int y = yl + 1;
+        if (grid[x][y] == 1) {
+            grid[x][y] = -1;
+            laststep = { xl, yl, 1 };
+            if (checkalive(grid, x, y, +1, 0) || checkalive(grid, x, y, -1, 0) || checkalive(grid, x, y, 0, +1) || checkalive(grid, x, y, 0, -1)) {
                 return "hitted";
             }
             else {
@@ -36,14 +65,14 @@ public:
             }
         }
         else {
-            grid[x+1][y+1] = -2;
-            laststep = { x, y, -1 };
+            grid[x][y] = -2;
+            laststep = { xl, yl, -1 };
             return "missed";
         }
     }
-    int showcell(int x, int y) const { return grid[x+1][y+1]; }
+    int showcell(int x, int y) const { return grid[x + 1][y + 1]; }
 
     const std::array<int, 3>& LastStep() const { return laststep; }
 
-    const int getShipsAlive() const { return shipsAlive; }    
+    const int getShipsAlive() const { return shipsAlive; }
 };

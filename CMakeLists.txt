@@ -17,8 +17,11 @@ endif()
 # 3. Исходные файлы
 set(SOURCES
     main.cpp
+    button.hpp
     player.hpp
     board.hpp
+    game.hpp
+    rules.hpp
 )
 
 # 4. Исполняемый файл

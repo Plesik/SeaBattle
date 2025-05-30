@@ -4,7 +4,7 @@
 #include <array>
 #include <algorithm>
 
-class Board {        //white = 0 not hitted, blackgrey = -2 killed ship, . =  1 hitted in empty(помеченные), grey =  -1 hitted
+class Board {        //white = 0 not hitted, brown = -3 killed ship, blue =  -2 hitted in empty(помеченные), grey =  -1 hitted
 private:
     Player& enemyPlayer;
     std::array<std::array<int, 10>, 10> gridForFight{};
@@ -54,19 +54,19 @@ private:
                 }
             }
         }
-        std::sort(ship.begin(), ship.end());
-        for (auto cell : ship) {
-            markCell(cell[0], cell[1], -2); //помечаем клетки убитого корабля
+        int min_x = 10, max_x = 0, min_y = 10, max_y = 0;
+        for (const auto& cell : ship) {
+            min_x = std::min(min_x, cell[0]);
+            max_x = std::max(max_x, cell[0]);
+            min_y = std::min(min_y, cell[1]);
+            max_y = std::max(max_y, cell[1]);
         }
-        // Пометить клетки вокруг
-        int min_x = ship[0][0], max_x = ship.back()[0];
-        int min_y = ship[0][1], max_y = ship.back()[1];
 
         for (int ix = min_x - 1; ix <= max_x + 1; ++ix) {
             for (int iy = min_y - 1; iy <= max_y + 1; ++iy) {
                 if (ix < 0 || ix >= 10 || iy < 0 || iy >= 10) continue;
                 if (gridForFight[ix][iy] == 0) {
-                    markCell(ix, iy, 1);
+                    markCell(ix, iy, -2);
                 }
             }
         }
@@ -75,26 +75,41 @@ private:
     void updateVisibleGrid(int x, int y, const std::string& result) {
         lastdif = {}; //очищаем массив с изменениями
         if (result == "missed") {
-            gridForFight[y][x] = -2; // Промах
-            lastdif.push_back({ x, y, 1 });
+            gridForFight[x][y] = -2; // Промах
+            markCell(x, y, -2);
         }
         if (result == "hitted") {
-            gridForFight[y][x] = -1;  // Попадание
-            lastdif.push_back({ x, y, -1 });
+            gridForFight[x][y] = -1;  // Попадание
+            markCell(x, y, -1);
         }
         if (result == "killed") {
+            markCell(x, y, -1);
             ifkilled(x, y, enemyPlayer);
         }
     }
 public:
-    std::array<std::array<int, 10>, 10> showdifGrid() const {
+    std::array<std::array<int, 10>, 10> Grid() const {
         return gridForFight;
     }
+    Board() = default;
+    Board& operator=(const Board&) = delete;
     Board(Player& enemy) : enemyPlayer(enemy) {}
-    void MakeAttack(int x, int y) {
+
+    std::string MakeAttack(int x, int y) {
         std::string attack = enemyPlayer.fire(x, y);
         updateVisibleGrid(x, y, attack);
+        return attack;
     }
-    const std::vector<std::array<int, 3>> showdif() { return lastdif; }
+    void getEnemy(Player& enemy) {
+        enemyPlayer = enemy;
+    }
+    std::vector<std::array<int, 3>> showdif() {
+        auto result = lastdif;
+        lastdif.clear();
+        return result;
+    }
     int showcell(int x, int y) const { return gridForFight[x][y]; }
+    bool iswin() const {
+        return enemyPlayer.getShipsAlive() == 0;
+    }
 };

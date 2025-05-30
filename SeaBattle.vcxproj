@@ -135,7 +135,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="board.hpp" />
+    <ClInclude Include="button.hpp" />
+    <ClInclude Include="game.hpp" />
     <ClInclude Include="player.hpp" />
+    <ClInclude Include="rules.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
