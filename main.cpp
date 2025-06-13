@@ -9,9 +9,11 @@ int main() {
     if (!font.loadFromFile("ArialRegular.ttf")) return 1;
 
 
-    Button playBtn("Play", font, sf::Vector2f(200, 50), 0, sf::Color::Black, sf::Color::White);
-    Button rulesBtn("Rules", font, sf::Vector2f(200, 50), 0, sf::Color::Black, sf::Color::White);
-    Button exitBtn("Exit", font, sf::Vector2f(200, 50), 0, sf::Color::Black, sf::Color::White);
+    Button playBtn("Play", font, sf::Vector2f(200.f, 50.f), 15.f, sf::Color::Black, sf::Color::White);
+    playBtn.waitUntilReady(); // ждём, пока форма построится
+
+    Button rulesBtn("Rules", font, sf::Vector2f(200.f, 50.f), 15.f, sf::Color::Black, sf::Color::White);
+    Button exitBtn("Exit", font, sf::Vector2f(200.f, 50.f), 15.f, sf::Color::Black, sf::Color::White);
     // Позиционирование кнопок
     playBtn.setPosition(sf::Vector2f(500, 300));
     rulesBtn.setPosition(sf::Vector2f(500, 400));

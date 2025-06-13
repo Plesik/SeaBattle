@@ -4,7 +4,7 @@
 #include <array>
 #include <algorithm>
 
-class Board {        //white = 0 not hitted, brown = -3 killed ship, blue =  -2 hitted in empty(помеченные), grey =  -1 hitted
+class Board {        
 private:
     Player& enemyPlayer;
     std::array<std::array<int, 10>, 10> gridForFight{};
@@ -15,46 +15,16 @@ private:
             lastdif.push_back({ x, y, state });
         }
     }
-    //если корабль убит, то в lastdif добавляются клетки вокруг него как помеченные
+
     void ifkilled(int x, int y, const Player& enemy) {
-        std::vector<std::array<int, 2>> ship{};
-        ship.push_back({ x, y });
-        for (int i = 1; i < 4; i++) { //добавляем клетки убитого корабля в ship и изменяем grid
-            bool u1 = true, u2 = true, u3 = true, u4 = true;
-            if (x + i < 10) {
-                if (enemy.showcell(x + i, y) == -1 && u1) {
-                    ship.push_back({ x + i, y });
-                }
-                else {
-                    u1 = false;
-                }
-            }
-            if (x - i >= 0) {
-                if (enemy.showcell(x - i, y) == -1 && u2) {
-                    ship.push_back({ x - i, y });
-                }
-                else {
-                    u2 = false;
-                }
-            }
-            if (y + i < 10) {
-                if (enemy.showcell(x, y + i) == -1 && u3) {
-                    ship.push_back({ x, y + i });
-                }
-                else {
-                    u3 = false;
-                }
-            }
-            if (y - i >= 0) {
-                if (enemy.showcell(x, y - i) == -1 && u4) {
-                    ship.push_back({ x, y - i });
-                }
-                else {
-                    u4 = false;
-                }
-            }
-        }
-        int min_x = 10, max_x = 0, min_y = 10, max_y = 0;
+        std::vector<std::array<int, 2>> ship;
+
+        findShipCells(x, y, enemy, ship);
+
+        if (ship.empty()) return;
+
+        // Находим границы корабля
+        int min_x = 10, max_x = -1, min_y = 10, max_y = -1;
         for (const auto& cell : ship) {
             min_x = std::min(min_x, cell[0]);
             max_x = std::max(max_x, cell[0]);
@@ -64,26 +34,42 @@ private:
 
         for (int ix = min_x - 1; ix <= max_x + 1; ++ix) {
             for (int iy = min_y - 1; iy <= max_y + 1; ++iy) {
-                if (ix < 0 || ix >= 10 || iy < 0 || iy >= 10) continue;
-                if (gridForFight[ix][iy] == 0) {
-                    markCell(ix, iy, -2);
+                if (ix >= 0 && ix < 10 && iy >= 0 && iy < 10) {
+                    if (gridForFight[ix][iy] == 0) {
+                        markCell(ix, iy, -1);
+                    }
                 }
             }
         }
+        for (const auto& cell : ship) {
+            markCell(cell[0], cell[1], -2); 
+        }
+    }
 
+    void findShipCells(int x, int y, const Player& enemy, std::vector<std::array<int, 2>>& ship) {
+        if (x < 0 || x >= 10 || y < 0 || y >= 10) return;
+        if (enemy.showcell(x, y) != -2) return;
+        for (const auto& cell : ship) {
+            if (cell[0] == x && cell[1] == y) return;
+        }
+
+        ship.push_back({ x, y });
+
+        findShipCells(x + 1, y, enemy, ship);
+        findShipCells(x - 1, y, enemy, ship);
+        findShipCells(x, y + 1, enemy, ship);
+        findShipCells(x, y - 1, enemy, ship);
     }
     void updateVisibleGrid(int x, int y, const std::string& result) {
-        lastdif = {}; //очищаем массив с изменениями
+        lastdif = {};
         if (result == "missed") {
-            gridForFight[x][y] = -2; // Промах
-            markCell(x, y, -2);
+            markCell(x, y, -1);
         }
         if (result == "hitted") {
-            gridForFight[x][y] = -1;  // Попадание
-            markCell(x, y, -1);
+            markCell(x, y, -2);
         }
         if (result == "killed") {
-            markCell(x, y, -1);
+            markCell(x, y, -2);
             ifkilled(x, y, enemyPlayer);
         }
     }

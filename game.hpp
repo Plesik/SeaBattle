@@ -11,8 +11,8 @@ private:
         Player2Setup,
         Battle1,
         Battle2,
-        endState,
-        switchState
+        switchState,
+        endState
     };
 
     sf::RenderWindow& m_window; //ссылка на основное окно, где происходит отрисовка
@@ -31,7 +31,7 @@ private:
     std::vector<sf::Text> m_rowLabels;  // 1Ц10 подписи к строкам
     std::vector<sf::Text> m_colLabels;  // AЦJ подписи к столбцам
 
-    int m_shipsToPlace = 20; //сколько игроку осталось поставить или убить кораблей
+    int m_cellsToPlace = 20; //сколько игроку осталось поставить
     int switcher = 0; //вли€ет на текст заголовка
 
 
@@ -103,7 +103,7 @@ private:
             m_titleText.setString("PLAYER 1 MAKE A MOVE");
         }
         else if (m_currentState == GameState::Battle2) {
-            m_titleText.setString("PLAYER 1 MAKE A MOVE");
+            m_titleText.setString("PLAYER 2 MAKE A MOVE");
         }
         else if (m_currentState == GameState::switchState) {
             if (switcher == 1) {
@@ -128,36 +128,56 @@ private:
     // ќбработка клика по клетке Ч добавление корабл€
     void handleCellClickPlace(int x, int y) {
         Player& currentPlayer = (m_currentState == GameState::Player1Setup) ? m_player1 : m_player2;
-
-        if (currentPlayer.addShip(x, y)) {
-            m_grid[x][y].setFillColor(SELECTED_COLOR);
-            m_shipsToPlace--;
-
-            if (m_shipsToPlace == 0) {
-                if (m_currentState == GameState::Player1Setup) {
-                    m_board2.getEnemy(m_player1);
-                }
-                else {
-                    m_board1.getEnemy(m_player2);
-                }
-                switchState();
+        std::string res = currentPlayer.givecell(x, y);
+        for (std::array<int, 3> i : currentPlayer.showdif()) {
+            if (i[2] == 0) {
+                m_grid[i[0]][i[1]].setFillColor(sf::Color::Transparent);
             }
+            else if (i[2] == 1) {
+                m_grid[i[0]][i[1]].setFillColor(SELECTED_COLOR);
+            }
+            else if (i[2] == -1) {
+                m_grid[i[0]][i[1]].setFillColor(MISSEDHIT_COLOR);
+            }
+        }
+        if (res == "switch state") {
+            if (m_currentState == GameState::Player1Setup) {
+                m_board2.getEnemy(m_player1);
+            }
+            else {
+                m_board1.getEnemy(m_player2);
+            }
+            switchState();
+        } 
+        else if (res == "wrong cell") {
+            m_titleText.setString("wrong cell");
+        }
+        if (res == "countinue") {
+            m_titleText.setString("COUNTINUE PLACE SHIPS");
+        }
+        if (res == "new ship") {
+            m_titleText.setString("Make new ship");
+        }
+        if (res == "error") {
+            m_titleText.setString("error");
         }
     }
     void handleCellClickFire(int x, int y) {
         Board& currentPlayer = (m_currentState == GameState::Battle1) ? m_board1 : m_board2;
-        std::string step = currentPlayer.MakeAttack(x, y);
-        iswin = currentPlayer.iswin();
-        for (std::array<int, 3> list : currentPlayer.showdif()) {
-            if (list[2] == -2) {
-                m_grid[list[0]][list[1]].setFillColor(MISSEDHIT_COLOR);
+        if (m_grid[x][y].getFillColor() != HIT_COLOR && m_grid[x][y].getFillColor() != MISSEDHIT_COLOR) {
+            std::string step = currentPlayer.MakeAttack(x, y);
+            iswin = currentPlayer.iswin();
+            for (std::array<int, 3> list : currentPlayer.showdif()) {
+                if (list[2] == -1) {
+                    m_grid[list[0]][list[1]].setFillColor(MISSEDHIT_COLOR);
+                }
+                if (list[2] == -2) {
+                    m_grid[list[0]][list[1]].setFillColor(HIT_COLOR);
+                }
             }
-            if (list[2] == -1) {
-                m_grid[list[0]][list[1]].setFillColor(HIT_COLOR);
+            if (step == "missed" or iswin) {
+                switchState();
             }
-        }
-        if (step == "missed") {
-            switchState();
         }
     }
     void handleMouseClickSwitch() {
@@ -169,7 +189,7 @@ private:
         int nextplayer = 0;
         if (m_currentState == GameState::Player1Setup) {
             m_currentState = GameState::switchState;
-            m_shipsToPlace = 20;
+            m_cellsToPlace = 20;
             switcher = 0;
             updateTitlePlace(switcher);
         }
@@ -181,10 +201,10 @@ private:
                 if (!iswin) {
                     for (int i = 0; i < 10; i++) {
                         for (int j = 0; j < 10; j++) {
-                            if (m_board1.showcell(i, j) == -2) {
+                            if (m_board1.showcell(i, j) == -1) {
                                 m_grid[i][j].setFillColor(MISSEDHIT_COLOR);
                             }
-                            if (m_board1.showcell(i, j) == -1) {
+                            if (m_board1.showcell(i, j) == -2) {
                                 m_grid[i][j].setFillColor(HIT_COLOR);
                             }
                         }
@@ -203,29 +223,42 @@ private:
                 if (!iswin) {
                     for (int i = 0; i < 10; i++) {
                         for (int j = 0; j < 10; j++) {
-                            if (m_board2.showcell(i, j) == -2) {
+                            if (m_board2.showcell(i, j) == -1) {
                                 m_grid[i][j].setFillColor(MISSEDHIT_COLOR);
                             }
-                            if (m_board2.showcell(i, j) == -1) {
+                            if (m_board2.showcell(i, j) == -2) {
                                 m_grid[i][j].setFillColor(HIT_COLOR);
                             }
                         }
                     }
                 }
             }
+            if (switcher == -1 || switcher == -2) {
+                m_currentState = GameState::endState;
+            }
         }
-        else if (m_currentState == GameState::Player2Setup){
+        else if (m_currentState == GameState::Player2Setup) {
             m_currentState = GameState::switchState;
             switcher = 1;
             updateTitlePlace(switcher);
         }
         else if (m_currentState == GameState::Battle1) {
-            switcher = 2;
+            if (iswin) {
+                switcher = -1;
+            }
+            else {
+                switcher = 2;
+            }
             m_currentState = GameState::switchState;
             updateTitlePlace(switcher);
         }
         else if (m_currentState == GameState::Battle2) {
-            switcher = 1;
+            if (iswin) {
+                switcher = -2;
+            }
+            else {
+                switcher = 1;
+            }
             m_currentState = GameState::switchState;
             updateTitlePlace(switcher);
         }
@@ -252,7 +285,7 @@ private:
             if (x >= 0 && x < 10 && y >= 0 && y < 10) {
                 handleCellClickPlace(x, y);
             }
-        } else if (m_currentState == GameState::switchState) {
+        } else if (m_currentState == GameState::switchState || m_currentState == GameState::endState) {
             handleMouseClickSwitch();
         }
     }
@@ -318,6 +351,9 @@ public:
             for (const auto& label : m_colLabels) m_window.draw(label);
 
             m_window.display(); //показываем кадр
+            if (m_currentState == GameState::endState) {
+                break;
+            }
         }
     }
 };
