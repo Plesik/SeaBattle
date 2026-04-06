@@ -15,7 +15,6 @@ private:
     unsigned pointCount = 30;
     std::mutex mutex;
 
-    // Async task future
     std::future<void> shapeFuture;
 
     void computeShapePoints() {
@@ -66,8 +65,6 @@ public:
             std::min(bgColor.g + 50, 255),
             std::min(bgColor.b + 50, 255)
         );
-
-        // Строим форму в отдельном потоке
         shapeFuture = std::async(std::launch::async, [this]() {
             computeShapePoints();
             });

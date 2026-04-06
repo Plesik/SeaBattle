@@ -1,7 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "Player.hpp"
-#include "Board.hpp"
+#include "player.hpp"
+#include "board.hpp"
 #include <array>
 
 class Game {
@@ -15,67 +15,62 @@ private:
         endState
     };
 
-    sf::RenderWindow& m_window; //ссылка на основное окно, где происходит отрисовка
-    sf::Font& m_font; //шрифт текста на экране
-    GameState m_currentState = GameState::Player1Setup;  //текущая фаза игры, в начале это расстановка кораблей игроком 1
+    sf::RenderWindow& m_window;
+    sf::Font& m_font;
+    GameState m_currentState = GameState::Player1Setup;
 
-    Player m_player1; //игрок 1, отвечает за расстановку и состояние кораблей игрока 1
-    Player m_player2; //игрок 2, отвечает за расстановку и состояние кораблей игрока 2
-    Board m_board1; //игровое поле игрока 1, в будущем после расстановки будет связано с полем player1
-    Board m_board2; //игровое поле игрока 2, в будущем после расстановки будет связано с полем player2
+    Player m_player1;
+    Player m_player2;
+    Board m_board1;
+    Board m_board2;
 
-    sf::Text m_titleText; //текст загаловка в окне, (сначала в расстановке потом во время игры)
+    sf::Text m_titleText;
 
-    std::array<std::array<sf::RectangleShape, 10>, 10> m_grid; //визуальное представление игрового поля, 10*10 прямоугольников
+    std::array<std::array<sf::RectangleShape, 10>, 10> m_grid;
 
-    std::vector<sf::Text> m_rowLabels;  // 1–10 подписи к строкам
-    std::vector<sf::Text> m_colLabels;  // A–J подписи к столбцам
+    std::vector<sf::Text> m_rowLabels;
+    std::vector<sf::Text> m_colLabels; 
 
-    int m_cellsToPlace = 20; //сколько игроку осталось поставить
-    int switcher = 0; //влияет на текст заголовка
+    int m_cellsToPlace = 20;
+    int switcher = 0;
 
 
-    const float cellSize = 40.f; //размер 1 клетки
-    const float gridStartX = 250.f; //координаты левого верхнего угла поля
+    const float cellSize = 40.f;
+    const float gridStartX = 250.f;
     const float gridStartY = 200.f;
     
 
-    bool iswin = false; //проверка на выигрыш
+    bool iswin = false;
 
-    const sf::Color MISSEDHIT_COLOR = sf::Color(160, 160, 160);//цвет попадания в никуда
+    const sf::Color MISSEDHIT_COLOR = sf::Color(160, 160, 160);
 
-    const sf::Color HIT_COLOR = sf::Color(100, 100, 100);//цвет попадания в корабль
-    const sf::Color GRID_OUTLINE = sf::Color::Black; //цвет контура сетки
-    const sf::Color HOVER_COLOR = sf::Color(200, 200, 200);  // цвет клетки при наведении Светло-серый
-    const sf::Color SELECTED_COLOR = sf::Color(100, 100, 100); //цвет клетки при ее выборе Тёмно-серый
-    const sf::Color BG_COLOR = sf::Color::White; //цвет фона
+    const sf::Color HIT_COLOR = sf::Color(100, 100, 100);
+    const sf::Color GRID_OUTLINE = sf::Color::Black;
+    const sf::Color HOVER_COLOR = sf::Color(200, 200, 200); 
+    const sf::Color SELECTED_COLOR = sf::Color(100, 100, 100); 
+    const sf::Color BG_COLOR = sf::Color::White;
 
-    // Инициализация сетки и координат
     void initGrid() {
         for (int x = 0; x < 10; ++x) {
             for (int y = 0; y < 10; ++y) {
                 sf::RectangleShape cell;
-                cell.setSize({ cellSize, cellSize }); //устанавливаем размер
-                cell.setPosition(gridStartX + x * cellSize, gridStartY + y * cellSize); //дает позицию прямоугольнику
-                cell.setFillColor(sf::Color::Transparent); //цвет заливки по умолчанию прозрачный
-                cell.setOutlineThickness(1.f); //толщина обводки
-                cell.setOutlineColor(GRID_OUTLINE); //дает цвет обводке
-                m_grid[x][y] = cell; //сохраняем клетку в массив сетки
+                cell.setSize({ cellSize, cellSize });
+                cell.setPosition(gridStartX + x * cellSize, gridStartY + y * cellSize);
+                cell.setFillColor(sf::Color::Transparent);
+                cell.setOutlineThickness(1.f);
+                cell.setOutlineColor(GRID_OUTLINE); 
+                m_grid[x][y] = cell;
             }
         }
-
-        // Координаты: 1–10 слева
         for (int i = 0; i < 10; ++i) {
             sf::Text label;
-            label.setFont(m_font); //шрифт
-            label.setString(std::to_string(i + 1)); //текст - число от 1 до 10
-            label.setCharacterSize(16); //размер шрифта
-            label.setFillColor(sf::Color::Black); //цвет шрифта
+            label.setFont(m_font);
+            label.setString(std::to_string(i + 1));
+            label.setCharacterSize(16);
+            label.setFillColor(sf::Color::Black);
             label.setPosition(gridStartX - 30.f, gridStartY + i * cellSize + 9.f); 
-            m_rowLabels.push_back(label); //заполняем вектор номеров
+            m_rowLabels.push_back(label);
         }
-
-        // Координаты: A–J сверху
         for (int i = 0; i < 10; ++i) {
             sf::Text label;
             label.setFont(m_font);
@@ -86,8 +81,6 @@ private:
             m_colLabels.push_back(label);
         }
     }
-
-    // Обновление текста заголовка в зависимости от фазы игры
     void updateTitlePlace(int switcher) {
         if (m_currentState == GameState::Player1Setup) {
             m_titleText.setString("PLAYER 1 PLACE YOUR SHIPS");
@@ -124,8 +117,6 @@ private:
         }
     }
 
-
-    // Обработка клика по клетке — добавление корабля
     void handleCellClickPlace(int x, int y) {
         Player& currentPlayer = (m_currentState == GameState::Player1Setup) ? m_player1 : m_player2;
         std::string res = currentPlayer.givecell(x, y);
@@ -184,7 +175,6 @@ private:
         switchState();
     }
 
-    // Смена состояния игры
     void switchState() {
         int nextplayer = 0;
         if (m_currentState == GameState::Player1Setup) {
@@ -264,7 +254,6 @@ private:
         }
     }
 
-    // Очистка сетки от цвета
     void resetGrid() {
         for (auto& row : m_grid) {
             for (auto& cell : row) {
@@ -273,7 +262,6 @@ private:
         }
     }
 
-    // Обработка клика мыши — по сетке для расстановки кораблей и огня, просто если фаза перехода
     void handleMouseClick(const sf::Vector2i& mousePixel) {
         int x = (mousePixel.x - static_cast<int>(gridStartX)) / static_cast<int>(cellSize);
         int y = (mousePixel.y - static_cast<int>(gridStartY)) / static_cast<int>(cellSize);
@@ -289,10 +277,6 @@ private:
             handleMouseClickSwitch();
         }
     }
-    
-
-
-    // Обработка наведения мыши на клетку — для подсветки
     void updateHoveredCell(const sf::Vector2i& mousePixel) {
         for (int i = 0; i < 10; ++i) {
             for (int j = 0; j < 10; ++j) {
@@ -313,18 +297,17 @@ private:
     }
 
 public:
-    // Конструктор игры
     Game(sf::RenderWindow& window, sf::Font& font)
         : m_window(window), m_font(font), m_board1(m_player2), m_board2(m_player1) {
         initGrid();
         updateTitlePlace(switcher);
     }
 
-    // Главный цикл игры
+
     void run() {
-        while (m_window.isOpen()) { //пока окно открыто обработка событий
+        while (m_window.isOpen()) {
             sf::Event event;
-            while (m_window.pollEvent(event)) { //начинаем перебирать все события
+            while (m_window.pollEvent(event)) {
                 if (event.type == sf::Event::Closed) {
                     m_window.close();
                 }
@@ -338,19 +321,15 @@ public:
 
             m_window.clear(BG_COLOR);
             m_window.draw(m_titleText);
-
-            // Рисуем сетку
             for (const auto& row : m_grid) {
                 for (const auto& cell : row) {
                     m_window.draw(cell);
                 }
             }
-
-            // Рисуем координаты
             for (const auto& label : m_rowLabels) m_window.draw(label);
             for (const auto& label : m_colLabels) m_window.draw(label);
 
-            m_window.display(); //показываем кадр
+            m_window.display();
             if (m_currentState == GameState::endState) {
                 break;
             }

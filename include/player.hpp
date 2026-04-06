@@ -3,17 +3,16 @@
 #include <iostream>
 #include <vector>
 
-class Player { //класс отвечает за попадани€ в поле на котором расстановленны корабли, 
+class Player {
 private:
     std::array<int, 4> countships = { 4, 3, 2, 1 };
     std::vector<std::array<int, 2>> shipnow{};
     std::vector<std::array<int, 2>> cellsfornext{};
-    std::array<std::array<int, 10>, 10> grid{}; // ѕоле 12x12 (инициализировано нул€ми) корабли сто€ть только в поле 10*10 внутри
+    std::array<std::array<int, 10>, 10> grid{};
     std::vector<std::array<int, 3>> difgrid{};
-    int shipsAlive = 10;// —четчик кораблей
-    std::array<int, 3> laststep{ 0, 0, 0 }; //{x, y, 1} - клетка с координатами [x, y] была частью корабл€ и подбита, если -1 то был огонь по пустой клетке
+    int shipsAlive = 10;
+    std::array<int, 3> laststep{ 0, 0, 0 };
     bool checkalive(const std::array<std::array<int, 10>, 10>& grid, int x, int y, int dx, int dy) {
-        // ѕровер€ем границы перед доступом
         if (x + dx < 0 || x + dx >= 10 || y + dy < 0 || y + dy >= 10)
             return false;
 
@@ -73,7 +72,6 @@ private:
     }
 public:
     Player() = default;
-    // ƒобавл€ет корабль(часть корабл€) в указанную клетку 
     std::string givecell(int x, int y) {
         if (x < 0 || x >= 10 || y < 0 || y >= 10) {
             return "wrong cell";
@@ -251,7 +249,7 @@ public:
     }
 
 
-    std::string fire(int x, int y) { //огонь по бл€дскому хутору
+    std::string fire(int x, int y) {
         if (grid[x][y] == 1) {
             grid[x][y] = -2;
             laststep = { x, y, 1 };

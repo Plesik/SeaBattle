@@ -1,57 +1,69 @@
-cmake_minimum_required(VERSION 3.15)
-project(SeaBattle)
+cmake_minimum_required(VERSION 3.20)
 
-# Настройка стандарта C++
+project(SeaBattle VERSION 1.0.0 LANGUAGES CXX)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# 1. Указываем путь к SFML вручную (если CMake не находит автоматически)
-set(SFML_DIR "C:/Users/danii/source/SFML-2.6.1/lib/cmake/SFML")  # Замените на ваш путь к SFML!
+option(SEABATTLE_FETCH_SFML "Download SFML automatically if it is not installed" ON)
 
-# 2. Поиск SFML
-find_package(SFML 2.6 COMPONENTS graphics window system REQUIRED)
-if(NOT SFML_FOUND)
-    message(FATAL_ERROR "SFML не найден! Укажите правильный SFML_DIR.")
-endif()
-
-# 3. Исходные файлы
-set(SOURCES
-    main.cpp
-    button.hpp
-    player.hpp
-    board.hpp
-    game.hpp
-    rules.hpp
+set(SEABATTLE_SOURCES
+    src/main.cpp
 )
 
-# 4. Исполняемый файл
-add_executable(SeaBattle ${SOURCES})
 
-# 5. Подключение SFML
-target_link_libraries(SeaBattle
+set(SEABATTLE_HEADERS
+    include/button.hpp
+    include/player.hpp
+    include/board.hpp
+    include/game.hpp
+    include/rules.hpp
+)
+
+find_package(SFML 2.6 QUIET COMPONENTS graphics window system)
+
+if(NOT SFML_FOUND AND SEABATTLE_FETCH_SFML)
+    include(FetchContent)
+
+    message(STATUS "SFML was not found. Fetching SFML 2.6.2 from GitHub...")
+
+    set(SFML_BUILD_AUDIO OFF CACHE BOOL "" FORCE)
+    set(SFML_BUILD_NETWORK OFF CACHE BOOL "" FORCE)
+    set(SFML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(SFML_BUILD_DOC OFF CACHE BOOL "" FORCE)
+    set(SFML_BUILD_TEST_SUITE OFF CACHE BOOL "" FORCE)
+
+    FetchContent_Declare(
+        sfml
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 2.6.2
+        GIT_SHALLOW ON
+    )
+
+    FetchContent_MakeAvailable(sfml)
+endif()
+
+add_executable(SeaBattle ${SEABATTLE_SOURCES} ${SEABATTLE_HEADERS})
+target_include_directories(SeaBattle PRIVATE include)
+
+target_link_libraries(SeaBattle PRIVATE
     sfml-graphics
     sfml-window
     sfml-system
 )
 
-# 6. Копирование шрифта и DLL (Windows)
-if (WIN32)
-    # Шрифт
-    if(EXISTS "${CMAKE_SOURCE_DIR}/ArialRegular.ttf")
-        configure_file(
-            ${CMAKE_SOURCE_DIR}/ArialRegular.ttf
-            ${CMAKE_BINARY_DIR}/ArialRegular.ttf
-            COPYONLY
-        )
-    else()
-        message(WARNING "Файл шрифта ArialRegular.ttf не найден в корне проекта!")
-    endif()
+set(SEABATTLE_FONT_SOURCE "${CMAKE_SOURCE_DIR}/assets/ArialRegular.ttf")
+set(SEABATTLE_FONT_TARGET "${CMAKE_CURRENT_BINARY_DIR}/assets/ArialRegular.ttf")
 
-    # DLL SFML (если не в PATH)
-    if(SFML_DIR)
-        file(GLOB SFML_DLLS
-            "${SFML_DIR}/../../bin/*.dll"  # Путь к DLL относительно SFML_DIR
-        )
-        file(COPY ${SFML_DLLS} DESTINATION ${CMAKE_BINARY_DIR})
-    endif()
+if(EXISTS "${SEABATTLE_FONT_SOURCE}")
+    configure_file("${SEABATTLE_FONT_SOURCE}" "${SEABATTLE_FONT_TARGET}" COPYONLY)
+else()
+    message(WARNING "ArialRegular.ttf was not found in the project root. The application may fail to start without the font file.")
+endif()
+
+if(MSVC)
+    target_compile_options(SeaBattle PRIVATE /W4 /permissive-)
+else()
+    target_compile_options(SeaBattle PRIVATE -Wall -Wextra -Wpedantic)
 endif()

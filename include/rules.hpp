@@ -25,7 +25,6 @@ private:
     sf::Text m_backText;
 
     void setupText() {
-        // Game rules in English
         std::vector<std::string> rules = {
             "Sea Battle Game Rules:",
             "1. Two players compete.",
@@ -49,8 +48,6 @@ private:
             text.setPosition(100.f, 100.f + i * 30.f);
             m_rulesText.push_back(text);
         }
-
-        // Back button
         m_backText.setFont(m_font);
         m_backText.setString("Back (ESC)");
         m_backText.setCharacterSize(24);
@@ -66,7 +63,7 @@ private:
                 return false;
             }
             if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-                return false; // просто выходим
+                return false;
             }
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (m_backText.getGlobalBounds().contains(
@@ -80,14 +77,10 @@ private:
     }
 
     void render() {
-        m_window.clear(sf::Color(30, 30, 60)); // Dark blue background
-
-        // Draw all rules text
+        m_window.clear(sf::Color(30, 30, 60));
         for (const auto& text : m_rulesText) {
             m_window.draw(text);
         }
-
-        // Draw back button
         m_window.draw(m_backText);
 
         m_window.display();
